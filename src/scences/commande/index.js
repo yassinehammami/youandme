@@ -3,16 +3,18 @@ import { Container, Typography, Button, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import UserContext from '../../contexts/UserContext';
-import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import { db } from '../../components/firebase-config'; // Import your Firebase configuration
+import axios from 'axios';
 
 const Commande = () => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
+  const [id , setId]= useState();
 
   useEffect(() => {
     const storedCartItems = JSON.parse(localStorage.getItem('panier')) || [];
+    const id =localStorage.getItem('id');
+    setId(id);
     setCartItems(storedCartItems);
   }, []);
 
@@ -21,25 +23,29 @@ const Commande = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user) {
-      toast.error('Veuillez vous connecter pour passer une commande.');
-      navigate('/login');
-      return;
-    }
+    // if (!user) {
+    //   toast.error('Veuillez vous connecter pour passer une commande.');
+    //   navigate('/login');
+    //   return;
+    // }
 
     try {
       const commandeData = {
-        userId: user.id,
-        products: cartItems.map((item) => ({ id: item.productId, price: item.price })),
+        userId: id,
+        state:"en cours",
+        produitIds: cartItems.map((item) => item.productId), 
         totalPrice: calculateTotalPrice(),
-        commandeDate: Timestamp.now(),
       };
-
-      await addDoc(collection(db, 'commande'), commandeData);
-
-      localStorage.removeItem('panier');
-      toast.success('Commande soumise avec succès!');
-      navigate('/confirmation');
+      
+      const res = await axios.post('http://192.168.1.193:4000/commande/create', commandeData); // Replace 'your-api-url' with your actual API endpoint
+      
+      if (res.status === 201) {
+        localStorage.removeItem('panier');
+        toast.success('Commande soumise avec succès!');
+        navigate('/confirmation');
+      } else {
+        toast.error('Erreur lors de la soumission de la commande.');
+      }
     } catch (error) {
       console.error('Error submitting order:', error);
       toast.error('Erreur lors de la soumission de la commande.');

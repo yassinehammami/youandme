@@ -1,40 +1,26 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Typography, TextField, Button, Grid } from '@mui/material';
+import { Container, Typography, TextField, Button, Grid, MenuItem } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../components/firebase-config';
+import axios from 'axios';
 import UserContext from '../../contexts/UserContext'; // Import the UserContext
 
 const CheckInformation = () => {
   const { user, setUser } = useContext(UserContext); // Use the user data and setUser function from UserContext
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    phone: '',
-    gouvernorat: '',
+    address: user?.address || '',
+    city: user?.city || '',
+    postalCode: user?.postalCode || '',
+    phone: user?.phone || '',
+    gouvernorat: user?.gouvernorat || '',
   });
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user) {
-        const docRef = doc(db, 'users', user.id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
-        } else {
-          console.log('No such document!');
-        }
-      }
-    };
-
-    fetchUserData();
-  }, [user]);
+  const gouvernorats = [
+    'Ariana', 'Béja', 'Ben Arous', 'Bizerte', 'Gabès', 'Gafsa', 'Jendouba', 'Kairouan',
+    'Kasserine', 'Kébili', 'Kef', 'Mahdia', 'Manouba', 'Médenine', 'Monastir', 'Nabeul',
+    'Sfax', 'Sidi Bouzid', 'Siliana', 'Sousse', 'Tataouine', 'Tozeur', 'Tunis', 'Zaghouan'
+  ];
 
   const handleChange = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
@@ -43,11 +29,18 @@ const CheckInformation = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      const userRef = doc(db, 'users', user.id);
-      await updateDoc(userRef, userData);
-      setUser({ ...user, ...userData }); // Update the user data in the UserContext
-      toast.success('Informations mises à jour avec succès!');
-      navigate('/commande'); // Navigate to the commande page
+      console.log(userData);
+      const res = await axios.put(`http://192.168.1.193:4000/user/update/${user.id}`, userData);
+      const { message, user: updatedUser } = res.data;
+      if (message === "User not found") {
+        toast.error("utilisateur n'existe pas");
+      } else if (message === "Error updating user") {
+        toast.error('Vérifiez vos données');
+      } else {
+        setUser(updatedUser);
+        toast.success('Informations mises à jour avec succès!');
+        navigate('/commande');
+      }
     } catch (error) {
       console.error('Error updating user information:', error);
       toast.error('Erreur lors de la mise à jour des informations.');
@@ -64,32 +57,59 @@ const CheckInformation = () => {
           {/* Add TextField components for each user data field */}
           <Grid item xs={12}>
             <TextField
-              label="Prénom"
-              name="firstName"
+              label="Adresse"
+              name="address"
               fullWidth
               required
-              value={userData.firstName}
+              value={userData.address}
               onChange={handleChange}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} sm={6}>
             <TextField
-              label="Nom de famille"
-              name="lastName"
+              select
+              label="Gouvernorat"
+              name="gouvernorat"
               fullWidth
               required
-              value={userData.lastName}
+              value={userData.gouvernorat}
+              onChange={handleChange}
+            >
+              {gouvernorats.map((gouvernorat) => (
+                <MenuItem key={gouvernorat} value={gouvernorat}>
+                  {gouvernorat}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Ville"
+              name="city"
+              fullWidth
+              required
+              value={userData.city}
               onChange={handleChange}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} sm={6}>
             <TextField
-              type="email"
-              label="Email"
-              name="email"
+              label="Code postal"
+              name="postalCode"
               fullWidth
               required
-              value={userData.email}
+              value={userData.postalCode}
+              onChange={handleChange}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              type="tel"
+              label="Numéro de téléphone"
+              name="phone"
+              fullWidth
+              required
+              value={userData.phone}
               onChange={handleChange}
             />
           </Grid>

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../../components/firebase-config'; // Import your Firestore config
+import axios from 'axios'; 
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -36,11 +37,20 @@ const SignUp = () => {
       return;
     }
     try {
-      // Save the user data to the "users" collection in Firestore (excluding the confirmPassword field)
       const { confirmPassword, ...userData } = formData;
-      await addDoc(collection(db, 'users'), userData);
-      toast.success('Compte créé avec succès!');
-      navigate('/login'); // Navigate to the login page after successful sign-up
+      console.log(formData);
+      axios.post('http://192.168.1.193:4000/user/create', userData)
+      .then(res => {
+        if (res.data.message === "Email already exists") {
+          toast.error('Email déjà utilisé');
+        } else if (res.data.message === "Error creating user") {
+          toast.error('Vérifiez vos données');
+        } else {
+          // User created successfully
+          toast.success('Compte créé avec succès!');
+          navigate('/login');
+        }
+      })
     } catch (error) {
       console.error('Error creating user:', error);
       toast.error('Erreur lors de la création du compte.');

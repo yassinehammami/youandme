@@ -9,12 +9,16 @@ function HomePage() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const querySnapshot = await getDocs(collection(db, "products"));
-      const productList = [];
-      querySnapshot.forEach((doc) => {
-        productList.push({ id: doc.id, ...doc.data() });
-      });
-      setProducts(productList);
+      try {
+        const response = await fetch('http://192.168.1.193:4000/produit');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
+        setProducts(data.data); // Assuming your products are under the 'data' key in the response
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
     };
 
     fetchProducts();
@@ -58,7 +62,7 @@ function HomePage() {
         {products.map((product) => (
   <a href={`/productdetail/${product.id}`} className="item-link" key={product.id}>
     <div className="item">
-      <img src={product.imageUrls ? product.imageUrls[0] : ''} alt={product.name} />
+      <img src={product.images[0].filepath ? product.images[0].filepath : ''} alt={product.name} />
       <h3>{product.name}</h3>
       <p className="price">Prix: {product.price} DT</p>
     </div>

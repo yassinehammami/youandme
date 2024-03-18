@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../components/firebase-config';
 import  UserContext  from '../../contexts/UserContext'; // Import the UserContext
+import axios from 'axios'; 
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -16,20 +17,24 @@ const Login = () => {
     e.preventDefault();
     try {
       // Query the "users" collection for a document with the provided email and password
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('email', '==', email), where('password', '==', password));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        toast.error('Email ou mot de passe incorrect.');
-        return;
-      }
-
-      querySnapshot.forEach((doc) => {
-        // Set the user data in the UserContext
-        setUser({ id: doc.id, ...doc.data() });
-        toast.success('Connexion réussie!');
-        navigate('/checkinformation'); // Navigate to the check information page after successful login
+      axios.post('http://192.168.1.193:4000/user/login', {email , password})
+      .then(res => {
+        const { token, message , user } = res.data;
+        if (token) {
+          // Login successful
+          localStorage.setItem('token', token);
+          localStorage.setItem('id', user.id);  // Store token in localStorage or sessionStorage
+          toast.success('Connexion réussie!');
+          setUser({ id:user.id ,...user });
+          navigate('/checkinformation'); // Redirect to dashboard or any authenticated route
+        } else {
+          // Login failed
+          toast.error(message || 'Erreur de connexion. Veuillez réessayer.');
+        }
+      })
+      .catch(error => {
+        console.error('Error logging in:', error);
+        toast.error('Erreur de connexion. Veuillez réessayer.');
       });
     } catch (error) {
       console.error('Error logging in:', error);

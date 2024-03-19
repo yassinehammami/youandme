@@ -17,7 +17,7 @@ const Login = () => {
     e.preventDefault();
     try {
       // Query the "users" collection for a document with the provided email and password
-      axios.post('http://192.168.1.193:4000/user/login', {email , password})
+      axios.post('http://192.168.1.25:4000/user/login', {email , password})
       .then(res => {
         const { token, message , user } = res.data;
         if (token) {

@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../../components/img/img.png';
 import './Header.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import MenuIcon from '@material-ui/icons/Menu';
 
 const Header = () => {
   const [visible, setVisible] = useState(true);
-  const [cartCount, setCartCount] = useState(0); // State to store the cart count
+  const [cartCount, setCartCount] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     // Update cart count from local storage
@@ -38,27 +40,35 @@ const Header = () => {
     };
   }, []);
 
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   let lastScrollY = window.pageYOffset;
 
   return (
     <header id="main-header" className={`transparent-header ${visible ? '' : 'hidden'}`}>
       <div className="header-container">
         <img src={logo} alt="You & Me Skin Care Logo" className="logo" />
+        <button id="menu-toggle" className="menu-toggle" onClick={toggleMenu}>
+    <MenuIcon />
+</button>
+
         <nav>
-          <ul className="nav-menu">
-            <li><Link to="/">ACCUEIL</Link></li>
-            <li><Link to="/about">À PROPOS</Link></li>
-            <li><Link to="/shop">BOUTIQUE</Link></li>
-            <li><Link to="/contact">CONTACTEZ-NOUS</Link></li>
+          <ul className={`nav-menu ${menuOpen ? 'open' : ''}`}>
+            <li><Link to="/" onClick={toggleMenu}>ACCUEIL</Link></li>
+            <li><Link to="/about" onClick={toggleMenu}>À PROPOS</Link></li>
+            <li><Link to="/shop" onClick={toggleMenu}>BOUTIQUE</Link></li>
+            <li><Link to="/contact" onClick={toggleMenu}>CONTACTEZ-NOUS</Link></li>
             <li>
-              <Link to="/cart">
-                <FontAwesomeIcon icon={faShoppingCart} />
+              <Link to="/cart" onClick={toggleMenu}>
+                <ShoppingCartIcon />
                 {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
               </Link>
             </li>
             <li>
-              <Link to="/login">
-                <FontAwesomeIcon icon={faUser} />
+              <Link to="/login" onClick={toggleMenu}>
+                <AccountCircleIcon />
               </Link>
             </li>
           </ul>

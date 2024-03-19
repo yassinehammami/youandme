@@ -114,6 +114,18 @@ nav ul li a {
 #shop button:hover {
     background-color: #444;
 }
+@media (max-width: 768px) {
+    .banner {
+        height: 50vh; /* Adjust the height on tablets */
+    }
+}
+
+@media (max-width: 480px) {
+    .banner {
+        height: 30vh; /* Adjust the height on mobile phones */
+    }
+}
+
 
 @media (max-width: 768px) {
     #shop a.item-link {
@@ -200,7 +212,14 @@ footer {
     height: 160px; /* Original height */
     margin-right: 2rem;
     transition: transform 0.3s ease; /* Smooth transition for scaling */
+    transform: scale(1.5); /* Scale the logo to 150% of its original size */
 }
+@media (max-width: 768px) {
+    header {
+        top: 0;
+    }
+}
+
 
 .header-container:hover .logo {
     transform: scale(1.2); /* Scale the logo to 120% of its original size */

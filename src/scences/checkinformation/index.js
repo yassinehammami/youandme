@@ -21,7 +21,11 @@ const CheckInformation = () => {
     'Kasserine', 'Kébili', 'Kef', 'Mahdia', 'Manouba', 'Médenine', 'Monastir', 'Nabeul',
     'Sfax', 'Sidi Bouzid', 'Siliana', 'Sousse', 'Tataouine', 'Tozeur', 'Tunis', 'Zaghouan'
   ];
-
+  const [token, setToken]= useState();
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setToken(token);
+  }, []);
   const handleChange = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
@@ -30,12 +34,19 @@ const CheckInformation = () => {
     e.preventDefault();
     try {
       console.log(userData);
-      const res = await axios.put(`http://192.168.1.193:4000/user/update/${user.id}`, userData);
+      const res = await axios.put(`http://192.168.1.25:4000/user/update/${user.id}`, userData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const { message, user: updatedUser } = res.data;
       if (message === "User not found") {
         toast.error("utilisateur n'existe pas");
       } else if (message === "Error updating user") {
         toast.error('Vérifiez vos données');
+      }  else if(res.data.message=="Unauthorized: Access token is required"){
+        navigate('/login');
       } else {
         setUser(updatedUser);
         toast.success('Informations mises à jour avec succès!');

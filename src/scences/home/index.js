@@ -10,7 +10,7 @@ function HomePage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://192.168.1.193:4000/produit');
+        const response = await fetch('http://192.168.1.25:4000/produit');
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }

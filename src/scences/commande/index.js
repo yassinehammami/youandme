@@ -10,9 +10,12 @@ const Commande = () => {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [id , setId]= useState();
+  const [token, setToken]= useState();
 
   useEffect(() => {
     const storedCartItems = JSON.parse(localStorage.getItem('panier')) || [];
+    const token = localStorage.getItem('token');
+    setToken(token);
     const id =localStorage.getItem('id');
     setId(id);
     setCartItems(storedCartItems);
@@ -21,7 +24,16 @@ const Commande = () => {
   const calculateTotalPrice = () => {
     return cartItems.reduce((acc, item) => acc + item.price, 0);
   };
-
+  const getFormattedDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
   const handleSubmit = async () => {
     // if (!user) {
     //   toast.error('Veuillez vous connecter pour passer une commande.');
@@ -32,17 +44,28 @@ const Commande = () => {
     try {
       const commandeData = {
         userId: id,
-        state:"en cours",
+        state:"Pending",
         produitIds: cartItems.map((item) => item.productId), 
         totalPrice: calculateTotalPrice(),
+        commandeDate : getFormattedDateTime(),
       };
       
-      const res = await axios.post('http://192.168.1.193:4000/commande/create', commandeData); // Replace 'your-api-url' with your actual API endpoint
+      const res = await axios.post('http://192.168.1.25:4000/commande/create', commandeData,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }); // Replace 'your-api-url' with your actual API endpoint
       
       if (res.status === 201) {
-        localStorage.removeItem('panier');
-        toast.success('Commande soumise avec succès!');
-        navigate('/confirmation');
+        if(res.data.message=="Unauthorized: Access token is required"){
+          navigate('/login');
+        }
+        else{
+          localStorage.removeItem('panier');
+          toast.success('Commande soumise avec succès!');
+          navigate('/confirmation');
+        }
+       
       } else {
         toast.error('Erreur lors de la soumission de la commande.');
       }

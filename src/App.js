@@ -11,6 +11,7 @@ import Login from './scences/login';
 import SignUp from './scences/signup';
 import Confirmation from './scences/confirmation';
 import CheckInformation from './scences/checkinformation';
+import UserProfile from './scences/userprofile/UserProfile';
 // Import other components
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -31,6 +32,7 @@ function App() {
         <Route path="/confirmation" element={<Confirmation />} />
         <Route path="/productdetail/:productId" element={<ProductDetail />} />
         <Route path="/checkinformation" element={<CheckInformation />} />
+        <Route path="/userprofile" element={<UserProfile />} />
         {/* Define other routes */}
       </Routes>
       </UserProvider>

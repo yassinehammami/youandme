@@ -50,7 +50,7 @@ const Commande = () => {
         commandeDate : getFormattedDateTime(),
       };
       
-      const res = await axios.post('http://192.168.1.25:4000/commande/create', commandeData,{
+      const res = await axios.post('http://localhost:4000/commande/create', commandeData,{
         headers: {
           Authorization: `Bearer ${token}`,
         },

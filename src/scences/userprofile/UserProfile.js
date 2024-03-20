@@ -1,20 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { db } from '../../components/firebase-config';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { Container, Typography, Paper, Grid, TextField, Button } from '@mui/material';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { Container, Typography, Paper, Grid, Button, List, ListItem, ListItemText, Divider } from '@mui/material';
 import UserContext from '../../contexts/UserContext'; // Import the UserContext
-import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const UserProfile = () => {
   const { user } = useContext(UserContext); // Use the user data from UserContext
-  const [userData, setUserData] = useState({
-    // Initialize with empty strings
-    address: '',
-    city: '',
-    postalCode: '',
-    phone: '',
-    gouvernorat: '',
-  });
+  const [userData, setUserData] = useState(null);
+  const [commandes, setCommandes] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -29,86 +24,74 @@ const UserProfile = () => {
       }
     };
 
+    const fetchCommandes = async () => {
+      if (user) {
+        const q = query(collection(db, 'commandes'), where('userId', '==', user.id));
+        const querySnapshot = await getDocs(q);
+        const commandesData = [];
+        querySnapshot.forEach((doc) => {
+          commandesData.push({ id: doc.id, ...doc.data() });
+        });
+        setCommandes(commandesData);
+      }
+    };
+
     fetchUserData();
+    fetchCommandes();
   }, [user]);
 
-  const handleChange = (e) => {
-    setUserData({ ...userData, [e.target.name]: e.target.value });
-  };
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      const userRef = doc(db, 'users', user.id);
-      await updateDoc(userRef, userData);
-      toast.success('User information updated successfully!');
-    } catch (error) {
-      console.error('Error updating user information:', error);
-      toast.error('Error updating user information.');
-    }
-  };
+  if (!userData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Container maxWidth="sm" sx={{ marginTop: '100px' }}>
       <Typography variant="h4" gutterBottom>
-        User Profile
+        Profil de l'utilisateur
       </Typography>
-      <Paper elevation={3} sx={{ padding: '20px' }}>
-        <form onSubmit={handleUpdate}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="Address"
-                name="address"
-                fullWidth
-                value={userData.address}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="City"
-                name="city"
-                fullWidth
-                value={userData.city}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Postal Code"
-                name="postalCode"
-                fullWidth
-                value={userData.postalCode}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Phone"
-                name="phone"
-                fullWidth
-                value={userData.phone}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Gouvernorat"
-                name="gouvernorat"
-                fullWidth
-                value={userData.gouvernorat}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Button type="submit" variant="contained" color="primary">
-                Update
-              </Button>
-            </Grid>
+      <Paper elevation={3} sx={{ padding: '20px', marginBottom: '20px' }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant="body1"><strong>Prénom:</strong> {userData.firstName}</Typography>
           </Grid>
-        </form>
+          <Grid item xs={12}>
+            <Typography variant="body1"><strong>Nom de famille:</strong> {userData.lastName}</Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="body1"><strong>Email:</strong> {userData.email}</Typography>
+          </Grid>
+          {/* Add more fields as needed */}
+        </Grid>
       </Paper>
+      <Typography variant="h5" gutterBottom>
+        Historique des commandes
+      </Typography>
+      <List>
+        {commandes.map((commande) => (
+          <div key={commande.id}>
+            <ListItem>
+              <ListItemText
+                primary={`Commande ID: ${commande.id}`}
+                secondary={`Total: ${commande.totalPrice} DT - Date: ${commande.commandeDate.toDate().toLocaleDateString()} - Statut: ${commande.status}`}
+              />
+            </ListItem>
+            <List>
+              {commande.products.map((product, index) => (
+                <ListItem key={index}>
+                  <ListItemText
+                    primary={`Produit ID: ${product.id}`}
+                    secondary={`Prix: ${product.price} DT`}
+                  />
+                </ListItem>
+              ))}
+            </List>
+            <Divider />
+          </div>
+        ))}
+      </List>
+      <Button variant="contained" color="primary" onClick={() => navigate('/updateuser')}>
+        Mettre à jour les informations
+      </Button>
     </Container>
   );
 };

@@ -39,7 +39,7 @@ const SignUp = () => {
     try {
       const { confirmPassword, ...userData } = formData;
       console.log(formData);
-      axios.post('http://192.168.1.25:4000/user/create', userData)
+      axios.post('http://localhost:4000/user/create', userData)
       .then(res => {
         if (res.data.message === "Email already exists") {
           toast.error('Email déjà utilisé');

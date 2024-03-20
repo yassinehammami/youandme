@@ -34,7 +34,7 @@ const CheckInformation = () => {
     e.preventDefault();
     try {
       console.log(userData);
-      const res = await axios.put(`http://192.168.1.25:4000/user/update/${user.id}`, userData,
+      const res = await axios.put(`http://localhost:4000/user/update/${user.id}`, userData,
       {
         headers: {
           Authorization: `Bearer ${token}`,

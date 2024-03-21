@@ -1,38 +1,55 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Container, Typography, TextField, Button, Grid } from '@mui/material';
 import { toast } from 'react-toastify';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../components/firebase-config';
 import UserContext from '../../contexts/UserContext'; // Import the UserContext
-
+import { useParams } from 'react-router-dom'
+import axios from 'axios';
 const UpdatePassword = () => {
   const { user } = useContext(UserContext); // Use the user data from UserContext
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
+  const [token, setToken]= useState();
+  const [id , setId]=useState();
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const id = localStorage.getItem('id');
+    setId(id);
+    setToken(token);
+  }, [token]);
   const handleChangePassword = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       toast.error('Le nouveau mot de passe et la confirmation ne correspondent pas.');
       return;
     }
-
-    try {
-      const userRef = doc(db, 'users', user.id);
-      const userDoc = await getDoc(userRef);
-
-      if (!userDoc.exists() || userDoc.data().password !== oldPassword) {
-        toast.error('L\'ancien mot de passe est incorrect.');
-        return;
+      try {
+        const res = await axios.put(
+          `http://localhost:4000/user/updatePasssword/${id}`,
+          { oldPassword, newPassword }, // Sending the current and new password in the request body
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const { message } = res.data;
+        if (message === "Password updated successfully") {
+          toast.success('Mot de passe mis à jour avec succès!');
+        } else if (message === "User not found") {
+          toast.error("Utilisateur n'existe pas");
+        } else if (message === "Current password is incorrect") {
+          toast.error('Le mot de passe actuel est incorrect');
+        } else {
+          toast.error('Une erreur s\'est produite lors de la mise à jour du mot de passe');
+        }
+      } catch (error) {
+        console.error('Error updating user password:', error);
+        toast.error('Erreur lors de la mise à jour du mot de passe.');
       }
-
-      await updateDoc(userRef, { password: newPassword });
-      toast.success('Mot de passe mis à jour avec succès!');
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du mot de passe:', error);
-      toast.error('Erreur lors de la mise à jour du mot de passe.');
-    }
+   
   };
 
   return (

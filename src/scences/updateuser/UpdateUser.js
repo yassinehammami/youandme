@@ -8,7 +8,8 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import axios from 'axios';
 
 const UpdateUser = () => {
-  const { user } = useContext(UserContext); // Use the user data from UserContext
+  // const { user } = useContext(UserContext); // Use the user data from UserContext
+  const [user, setUser]= useState({});
   const [userData, setUserData] = useState({
     // Initialize with empty strings
     address: '',
@@ -19,31 +20,44 @@ const UpdateUser = () => {
   });
   const navigate = useNavigate(); // Initialize useNavigate
   const [token, setToken]= useState();
+  const [id , setId]=useState();
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const id = localStorage.getItem('id');
     setToken(token);
-    
-    // const fetchUserData = async () => {
-    //   if (user) {
-    //     const docRef = doc(db, 'users', user.id);
-    //     const docSnap = await getDoc(docRef);
-    //     if (docSnap.exists()) {
-    //       setUserData(docSnap.data());
-    //     } else {
-    //       console.log('No such document!');
-    //     }
-    //   }
-    // };
-  }, [user]);
-
+    setId(id);
+  
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:4000/user/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (response.data.message === "User not found") {
+          toast.error('Utilisateur non trouvé');
+        } else if (response.data.message === "User found") {
+          setUserData(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching user information:', error);
+        toast.error('Erreur lors de la récupération des informations.');
+      }
+    };
+  
+    if (id && token) {
+      fetchUserData();
+    }
+  }, [id, token]);
+  
   const handleChange = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
   const handleUpdate = async (e) => {
         try {
-            console.log(userData);
-            const res = await axios.put(`http://localhost:4000/user/update/${user.id}`, userData,
+            const res = await axios.put(`http://localhost:4000/user/update/${id}`, userData,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -59,7 +73,6 @@ const UpdateUser = () => {
             } else {
                 setUserData(updatedUser);
               toast.success('Informations mises à jour avec succès!');
-              navigate('/commande');
             }
           } catch (error) {
             console.error('Error updating user information:', error);
@@ -127,7 +140,7 @@ const UpdateUser = () => {
             </Grid>
           </Grid>
         </form>
-        <Button variant="contained" color="secondary" sx={{ mt: 2 }} onClick={() => navigate('/updatepassword')}>
+        <Button variant="contained" color="secondary" sx={{ mt: 2 }} onClick={() => navigate(`/updatepassword/${id}`)}>
           Modifier le mot de passe
         </Button>
       </Paper>

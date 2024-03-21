@@ -1,46 +1,54 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { db } from '../../components/firebase-config';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { Container, Typography, Paper, Grid, Button, List, ListItem, ListItemText, Divider } from '@mui/material';
-import UserContext from '../../contexts/UserContext'; // Import the UserContext
+import UserContext from '../../contexts/UserContext';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom'
 
 const UserProfile = () => {
-  const { user } = useContext(UserContext); // Use the user data from UserContext
+  const { user } = useContext(UserContext);
   const [userData, setUserData] = useState(null);
   const [commandes, setCommandes] = useState([]);
   const navigate = useNavigate();
-
+  const [token, setToken]= useState();
+  const [id , setId]=useState();
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    const id = localStorage.getItem('id');
+    setToken(token);
+    setId(id);
     const fetchUserData = async () => {
-      if (user) {
-        const docRef = doc(db, 'users', user.id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
-        } else {
-          console.log('No such document!');
-        }
+      try {
+        const res = await axios.get(`http://localhost:4000/user/${id}`,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const { data } = res.data;
+        setUserData(data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
       }
     };
 
     const fetchCommandes = async () => {
-      if (user) {
-        const q = query(collection(db, 'commandes'), where('userId', '==', user.id));
-        const querySnapshot = await getDocs(q);
-        const commandesData = [];
-        querySnapshot.forEach((doc) => {
-          commandesData.push({ id: doc.id, ...doc.data() });
+      try {
+        const res = await axios.get(`http://localhost:4000/commande/userById/${id}`,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
-        setCommandes(commandesData);
+        const { data } = res.data;
+        setCommandes(data);
+      } catch (error) {
+        console.error('Error fetching user commands:', error);
       }
     };
+      fetchUserData();
+      fetchCommandes();
+  }, [id]);
 
-    fetchUserData();
-    fetchCommandes();
-  }, [user]);
-
-  if (!userData) {
+  if (!userData || !commandes) {
     return <div>Loading...</div>;
   }
 
@@ -72,7 +80,7 @@ const UserProfile = () => {
             <ListItem>
               <ListItemText
                 primary={`Commande ID: ${commande.id}`}
-                secondary={`Total: ${commande.totalPrice} DT - Date: ${commande.commandeDate.toDate().toLocaleDateString()} - Statut: ${commande.status}`}
+                secondary={`Total: ${commande.totalPrice} DT - Date: ${new Date(commande.commandeDate).toLocaleDateString()} - Statut: ${commande.state}`}
               />
             </ListItem>
             <List>
@@ -80,7 +88,7 @@ const UserProfile = () => {
                 <ListItem key={index}>
                   <ListItemText
                     primary={`Produit ID: ${product.id}`}
-                    secondary={`Prix: ${product.price} DT`}
+                    secondary={`Nom: ${product.name}`}
                   />
                 </ListItem>
               ))}
@@ -89,7 +97,7 @@ const UserProfile = () => {
           </div>
         ))}
       </List>
-      <Button variant="contained" color="primary" onClick={() => navigate('/updateuser')}>
+      <Button variant="contained" color="primary" onClick={() => navigate(`/updateuser/${id}`)}>
         Mettre à jour les informations
       </Button>
     </Container>

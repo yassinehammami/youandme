@@ -43,6 +43,9 @@ const SignUp = () => {
       .then(res => {
         if (res.data.message === "Email already exists") {
           toast.error('Email déjà utilisé');
+          
+        }else if (res.data.message === "Phone already exists") {
+          toast.error('Le téléphone existe déjà');
         } else if (res.data.message === "Error creating user") {
           toast.error('Vérifiez vos données');
         } else {

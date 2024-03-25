@@ -87,9 +87,12 @@ const UserProfile = () => {
               {commande.products.map((product, index) => (
                 <ListItem key={index}>
                   <ListItemText
-                    primary={`Produit ID: ${product.id}`}
-                    secondary={`Nom: ${product.name}`}
-                  />
+                      primary={`Produit ID: ${product.id}`}
+                      secondary={[
+                        `Nom: ${product.name}`,
+                        `Quantité: ${product.quantity}`,
+                      ]}
+                    />
                 </ListItem>
               ))}
             </List>

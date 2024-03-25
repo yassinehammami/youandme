@@ -50,7 +50,7 @@ const Commande = () => {
         totalPrice: calculateTotalPrice(),
         commandeDate : getFormattedDateTime(),
       };
-      
+      console.log(commandeData);
       const res = await axios.post('http://localhost:4000/commande/create', commandeData,{
         headers: {
           Authorization: `Bearer ${token}`,
@@ -68,7 +68,8 @@ const Commande = () => {
         }
        
       } else {
-        toast.error('Erreur lors de la soumission de la commande.');
+        // toast.error('Erreur lors de la soumission de la commande.');
+        navigate('/login');
       }
     } catch (error) {
       console.error('Error submitting order:', error);

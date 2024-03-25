@@ -34,16 +34,27 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     const cartItems = JSON.parse(localStorage.getItem('panier')) || [];
-    const newCartItem = {
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      imageUrl: mainImageUrl,
-    };
-
-    cartItems.push(newCartItem);
+    const existingItem = cartItems.find(item => item.productId === product.id);
+  
+    if (existingItem) {
+      // If the item already exists in the cart, just update its quantity
+      existingItem.quantity += 1;
+    } else {
+      // If it's a new item, add it to the cart with a quantity of 1
+      const newCartItem = {
+        cartItemId: Date.now(),
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        imageUrl: mainImageUrl,
+        quantity: 1,  // Initialize the quantity property
+      };
+  
+      cartItems.push(newCartItem);
+    }
+  
     localStorage.setItem('panier', JSON.stringify(cartItems));
-
+  
     toast.success('Product added to cart successfully!', {
       position: "top-center",
       autoClose: 5000,

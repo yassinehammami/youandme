@@ -184,7 +184,7 @@ const SignUp = () => {
           </Grid>
       
           <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" fullWidth>
+          <Button type="submit" variant="contained" color="primary" fullWidth>
               S'inscrire
             </Button>
           </Grid>

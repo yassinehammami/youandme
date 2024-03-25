@@ -53,16 +53,33 @@ nav ul li a {
 }
 
 .banner {
-    background-image: url('../../components/img/BACKGROUND2.jpg');
-    background-size: cover;
-    background-position: center;
-    height: 80vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
+    position: relative;
+    height: 80vh; /* Adjust this value to change the height of the video */
+    overflow: hidden;
+  }
+  
+  
+  .banner video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  @media (max-width: 768px) {
+    .banner {
+      height: 50vh;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .banner {
+      height: 30vh;
+    }
+  }
+  
 #shop {
     display: flex;
     flex-wrap: wrap;
@@ -358,3 +375,77 @@ footer {
         background: #f4f4f4;
     }
 }
+.item-container {
+    padding: 15px;
+  }
+  .carousel {
+    display: flex;
+    overflow: hidden;
+  }
+  
+  .carousel-item {
+    min-width: 25%; /* Adjust based on the number of items you want to show */
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  .carousel-item.active {
+    opacity: 1;
+  }
+  .shop-section {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .item-container {
+    margin: 10px;
+    width: calc(25% - 20px); /* Adjust the width for four items per row */
+  }
+  .item-container {
+    margin: 10px;
+    width: calc(25% - 20px); /* Adjust the width for four items per row */
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  
+  .item-container.fade-out {
+    animation: fadeOut 1s forwards;
+  }
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #fff;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 24px;
+    z-index: 10;
+  }
+  
+  .prev-btn {
+    left: 10px;
+  }
+  
+  .next-btn {
+    right: 10px;
+  }
+  
+  .shop-section {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  

@@ -17,6 +17,9 @@ import UpdatePassword from './scences/updatepassword/UpdatePassword';
 // Import other components
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Footer from './scences/footer';
+import AboutUs from './scences/about';
+import AboutUs1 from './scences/aboutus';
 import './App.css'
 function App() {
   return (
@@ -24,6 +27,7 @@ function App() {
       <UserProvider>
        <ToastContainer />
       <Header />
+    
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/product" element={<ProductForm />} />
@@ -37,9 +41,14 @@ function App() {
         <Route path="/userprofile/:userId" element={<UserProfile />} />
         <Route path="/updateuser/:userId" element={<UpdateUser />} />
         <Route path="/updatepassword/:userId" element={<UpdatePassword />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/aboutus" element={<AboutUs1 />} />
         {/* Define other routes */}
       </Routes>
+    
+      <Footer />
       </UserProvider>
+     
     </div>
   );
 }

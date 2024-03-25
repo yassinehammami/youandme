@@ -4,9 +4,20 @@ import logo from "../../components/img/img.png"
 import creme from "../../components/img/CREME2.jpg"
 import { db } from '../../components/firebase-config'
 import { collection, getDocs } from 'firebase/firestore';
+import { Box } from '@mui/material';
+import background1 from './background5.mp4'
+import background2 from './background2.mp4'
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+
 function HomePage() {
   const [products, setProducts] = useState([]);
-
+  const [backgroundVideo, setBackgroundVideo] = useState(background1);
+  const [currentSet, setCurrentSet] = useState(0);
+  const [fadeOut, setFadeOut] = useState(false);
+  const itemsPerSet = 4;
+  const totalSets = Math.ceil(products.length / itemsPerSet);
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -31,6 +42,36 @@ function HomePage() {
       header.style.opacity = '1';
     }
   };
+  useEffect(() => {
+    const updateBackgroundVideo = () => {
+      if (window.innerWidth < 768) { // Change this value based on your desired breakpoint
+        setBackgroundVideo(background2);
+      } else {
+        setBackgroundVideo(background1);
+      }
+    };
+  
+    updateBackgroundVideo();
+    window.addEventListener('resize', updateBackgroundVideo);
+  
+    return () => window.removeEventListener('resize', updateBackgroundVideo);
+  }, []);
+  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      // Fetch products...
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleNext = () => {
+    setCurrentSet((prevSet) => (prevSet + 1) % totalSets);
+  };
+
+  const handlePrev = () => {
+    setCurrentSet((prevSet) => (prevSet - 1 + totalSets) % totalSets);
+  };
 
   const toggleMenu = () => {
     const navMenu = document.getElementById('nav-menu');
@@ -46,78 +87,82 @@ function HomePage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 4,
+    slidesToScroll: 4,
+    autoplay: true,
+    autoplaySpeed: 5000,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 3,
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 2,
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+    ],
+  };
+  
   return (
     <div>
-      
+     
       <main>
-    <section id="home" class="banner">
-        
-    </section>
+      <section id="home" className="banner">
+      <Box sx={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+      <video autoPlay muted loop style={{ width: '100%', height: '100%', objectFit: 'cover' }}>
+  <source src={backgroundVideo} type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+</Box>
+
+        </section>
 
    
-<section id="shop">
+        <section id="shop" className="shop-section">
+        <button className="carousel-btn prev-btn" onClick={handlePrev}>&lt;</button>
+        {products
+          .slice(currentSet * itemsPerSet, (currentSet + 1) * itemsPerSet)
+          .map((product, index) => (
+            <div key={index} className="item-container">
+              <a href={`/productdetail/${product.id}`} className="item-link">
+                <div className="item">
+                  <img src={product.images[0].filepath ? product.images[0].filepath : ''} alt={product.name} />
+                  <h3>{product.name}</h3>
+                  <p className="price">Prix: {product.price} DT</p>
+                </div>
+              </a>
+            </div>
+          ))}
+        <button className="carousel-btn next-btn" onClick={handleNext}>&gt;</button>
+      </section>
 
-   
-       
-        {products.map((product) => (
-  <a href={`/productdetail/${product.id}`} className="item-link" key={product.id}>
-    <div className="item">
-      <img src={product.images[0].filepath ? product.images[0].filepath : ''} alt={product.name} />
-      <h3>{product.name}</h3>
-      <p className="price">Prix: {product.price} DT</p>
-    </div>
-  </a>
-))}
 
-</section>
     <section id="blog">
       
     </section>
 
-    <section id="contact">
-       
-    </section>
+   
 </main>
-<section id="about"  class="about-section">
-       
-</section>
-<footer>
-    <div class="container footer-content">
-        <div class="footer-section about">
-            <h3>Soins de la Peau You & Me</h3>
-            <p>Votre parcours vers une peau plus saine et plus heureuse commence ici.</p><p> Faites confiance à notre approche naturelle de la beauté.</p>
-        </div>
-        <div class="footer-section links">
-            <h3>Liens Rapides</h3>
-            <ul>
-                <li><a href="#home">Accueil</a></li>
-                <li><a href="#about">À Propos de Nous</a></li>
-                <li><a href="#shop">Boutique</a></li>
-                <li><a href="#contact">Contactez-Nous</a></li>
-            </ul>
-        </div>
-        <div class="footer-section social">
-            <h3>Suivez-Nous</h3>
-            <p>Connectez-vous avec nous sur les réseaux sociaux</p><p>
-                 pour les dernières mises à jour.</p>
-            <div class="social-icons">
-                <a href="https://www.facebook.com/youandmetunisia" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                <a href="https://www.instagram.com/youandme_skincare?igsh=MWJyeGd0bHBiYzRsMQ==" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-            </div>
-        </div>
-        <div class="footer-section contact">
-            <h3>Informations de Contact</h3>
-            <ul>
-                <li><i class="fa fa-map-marker"></i><strong> Adresse :</strong> Rue bouraoui zaanouni Jawhara sousse 4000</li>
-                <li><i class="fa fa-phone"></i><strong> Téléphone :</strong> 52 949 949</li>
-                <li><i class="fa fa-envelope"></i><strong> Email :</strong> youandme.tunisia@gmail.com</li>
-            </ul>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        &copy; 2024 Soins de la Peau You & Me. Tous droits réservés.
-    </div>
-</footer>
+
+
     </div>
   );
 }

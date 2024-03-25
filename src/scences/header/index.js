@@ -5,6 +5,7 @@ import './Header.css';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
+import { Badge } from '@mui/material';
 
 const Header = () => {
   const [visible, setVisible] = useState(true);
@@ -61,11 +62,13 @@ const Header = () => {
             <li><Link to="/shop" onClick={toggleMenu}>BOUTIQUE</Link></li>
             <li><Link to="/contact" onClick={toggleMenu}>CONTACTEZ-NOUS</Link></li>
             <li>
-              <Link to="/cart" onClick={toggleMenu}>
-                <ShoppingCartIcon />
-                {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-              </Link>
-            </li>
+  <Link to="/cart" onClick={toggleMenu} className="cart-icon">
+    <Badge badgeContent={cartCount} color="primary">
+      <ShoppingCartIcon />
+    </Badge>
+  </Link>
+</li>
+
             <li>
               <Link to="/login" onClick={toggleMenu}>
                 <AccountCircleIcon />

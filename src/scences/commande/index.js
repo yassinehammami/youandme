@@ -22,8 +22,9 @@ const Commande = () => {
   }, []);
 
   const calculateTotalPrice = () => {
-    return cartItems.reduce((acc, item) => acc + item.price, 0);
+    return cartItems.reduce((acc, item) => acc + parseFloat(item.price), 0).toFixed(2);
   };
+  
   const getFormattedDateTime = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -35,17 +36,17 @@ const Commande = () => {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
   const handleSubmit = async () => {
-    // if (!user) {
-    //   toast.error('Veuillez vous connecter pour passer une commande.');
-    //   navigate('/login');
-    //   return;
-    // }
+      if (!id) {
+      toast.error('Veuillez vous connecter pour passer une commande.');
+      navigate('/login');
+      return;
+     }
 
     try {
       const commandeData = {
         userId: id,
         state:"Pending",
-        produitIds: cartItems.map((item) => item.productId), 
+        products: cartItems.map((item) => ({ productId: item.productId, quantity: item.quantity })),
         totalPrice: calculateTotalPrice(),
         commandeDate : getFormattedDateTime(),
       };
